@@ -29,6 +29,9 @@ import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 
 import hudson.model.Run;
 import hudson.security.ACL;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import jenkins.model.Jenkins;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -164,12 +167,23 @@ public class ConjurAPI {
 	public static OkHttpClient getHttpClient(ConjurConfiguration configuration) {
 
 		OkHttpClient client = null;
-
-		CertificateCredentials certificate = CredentialsMatchers.firstOrNull(
+                CertificateCredentials certificate = null;
+                
+                try
+                {
+                    certificate = CredentialsMatchers.firstOrNull(
 				CredentialsProvider.lookupCredentials(CertificateCredentials.class,
 						Jenkins.getInstance(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()),
 				CredentialsMatchers.withId(configuration.getCertificateCredentialID())
 				);
+                }
+                catch (Exception e)
+                {
+                    Writer writer = new StringWriter();
+                    e.printStackTrace(new PrintWriter(writer));
+                    String s = writer.toString();
+                    LOGGER.log(Level.WARNING, "Failed to reterive certifcate: {0}", s);
+                }
 
 		if (certificate != null) {
 			try {
