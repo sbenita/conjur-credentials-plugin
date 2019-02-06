@@ -35,47 +35,60 @@ import hudson.model.Item;
 import hudson.model.ItemGroup;
 import hudson.model.Run;
 import hudson.util.Secret;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.CheckForNull;
-import okhttp3.OkHttpClient;
-import org.conjur.jenkins.api.ConjurAPI;
-import org.conjur.jenkins.configuration.ConjurConfiguration;
-import org.conjur.jenkins.configuration.FolderConjurConfiguration;
-import org.conjur.jenkins.configuration.GlobalConjurConfiguration;
-import org.jenkinsci.plugins.credentialsbinding.BindingDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-@NameWith(value = ConjurSecretUsernamePasswordCredentials.NameProvider.class, priority = 40)
-public interface ConjurSecretUsernamePasswordCredentials extends StandardUsernamePasswordCredentials {
-    String getDisplayName();
+@NameWith(value = ConjurUsernamePasswordCredentials.NameProvider.class)
+public class ConjurUsernamePasswordCredentials extends ConjurCredentialBase
+        implements StandardUsernamePasswordCredentials {
     
-    static class NameProvider extends CredentialsNameProvider<ConjurSecretUsernamePasswordCredentials> {
-        @Override
-        public String getName(ConjurSecretUsernamePasswordCredentials conjurSecretUsernamePasswordCredentials) {
-                String description = conjurSecretUsernamePasswordCredentials.getDescription();
-                return conjurSecretUsernamePasswordCredentials.getDisplayName()
-                                + "/*Conjur*"
-                                + " (" + description + ")";
-        }
+    private static final long serialVersionUID = 1L;
+    
+    private String usernameVariablePath; // to be used as Username    
+    private String passwordVariablePath; // to be used as Password
+    
+     @DataBoundConstructor
+    public ConjurUsernamePasswordCredentials(@CheckForNull CredentialsScope scope,
+                                             String id,
+                                             @CheckForNull String usernameVariablePath,
+                                             @CheckForNull String passwordVariablePath,
+                                             String description) {
+        super(scope, id, description);
+        this.usernameVariablePath = usernameVariablePath;
+        this.passwordVariablePath = passwordVariablePath;
+    }
 
+    @Override
+    public String getUsername() {
+        return (getSecret(usernameVariablePath).getPlainText());
+    }
+
+    @Override
+    public Secret getPassword() {
+        return (getSecret(passwordVariablePath));
     }
     
-    @Extension
-    public static class DescriptorImpl extends BindingDescriptor<ConjurSecretUsernamePasswordCredentials> {
-		
-        @Override
-        protected Class<ConjurSecretUsernamePasswordCredentials> type() {
-            return ConjurSecretUsernamePasswordCredentials.class;
-        }
+    public String getDisplayName() {
+            return "Conjur:" + this.usernameVariablePath;
+    }
+
+    @Extension(ordinal = 1)
+    public static class DescriptorImpl extends BaseStandardCredentialsDescriptor {
 
         @Override
         public String getDisplayName() {
             return "Conjur Username Password Credential";
+        }
+    }    
+        
+    static class NameProvider extends CredentialsNameProvider<ConjurUsernamePasswordCredentials> {
+        
+        @Override
+        public String getName(ConjurUsernamePasswordCredentials conjurUsernamePasswordCredentials) {
+                String description = conjurUsernamePasswordCredentials.getDescription();
+                return conjurUsernamePasswordCredentials.getDisplayName()
+                                + "/*Conjur*"
+                                + " (" + description + ")";
         }
 
     }
