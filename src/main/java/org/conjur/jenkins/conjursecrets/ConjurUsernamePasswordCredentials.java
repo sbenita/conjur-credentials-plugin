@@ -23,17 +23,11 @@
  */
 package org.conjur.jenkins.conjursecrets;
 
-import com.cloudbees.hudson.plugins.folder.AbstractFolder;
-import com.cloudbees.plugins.credentials.CredentialsDescriptor;
 import com.cloudbees.plugins.credentials.CredentialsNameProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.NameWith;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-import com.cloudbees.plugins.credentials.impl.BaseStandardCredentials;
 import hudson.Extension;
-import hudson.model.Item;
-import hudson.model.ItemGroup;
-import hudson.model.Run;
 import hudson.util.Secret;
 import javax.annotation.CheckForNull;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -77,11 +71,11 @@ public class ConjurUsernamePasswordCredentials extends ConjurCredentialBase
 
         @Override
         public String getDisplayName() {
-            return "Conjur Username Password Credential";
+                return "Conjur Username Password Credential";
         }
     }    
         
-    static class NameProvider extends CredentialsNameProvider<ConjurUsernamePasswordCredentials> {
+    public static class NameProvider extends CredentialsNameProvider<ConjurUsernamePasswordCredentials> {
         
         @Override
         public String getName(ConjurUsernamePasswordCredentials conjurUsernamePasswordCredentials) {

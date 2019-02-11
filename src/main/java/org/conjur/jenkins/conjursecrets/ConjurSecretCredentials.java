@@ -16,6 +16,7 @@ import hudson.util.Secret;
 public interface ConjurSecretCredentials extends StandardCredentials {
 	
 	String getDisplayName();
+	Secret getSecret();
 	void setConjurConfiguration(ConjurConfiguration conjurConfiguration);
 	void setContext(Run<?, ?> context);
 		
